@@ -31,19 +31,32 @@ pipeline {
                     # Run new container
                     docker run -d \
                         --name ${DOCKER_IMAGE} \
+                        --restart unless-stopped \
                         -p 8501:8501 \
                         ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    
+                    # Reload Nginx
+                    sudo systemctl reload nginx
+                """
+            }
+        }
+        
+        stage('SSL Certificate Check') {
+            steps {
+                sh """
+                    # Check SSL certificate expiry
+                    certbot certificates
                 """
             }
         }
     }
     
     post {
-        failure {
-            echo 'Pipeline failed!'
-        }
         success {
             echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
