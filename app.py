@@ -193,7 +193,7 @@ def create_excel_with_images(results):
     return excel_buffer
 
 def main():
-    st.title("Image Analysis App")
+    st.title("Vamshi's Estate sales Analysis")
     
     # Sidebar for API key
     api_key = st.sidebar.text_input("Enter your API key:", type="password")
