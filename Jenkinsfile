@@ -15,28 +15,35 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
+                sh """
+                    docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                """
             }
         }
         
         stage('Deploy to Linode') {
             steps {
-                script {
-                    // Stop existing container
-                    sh 'docker stop ${DOCKER_IMAGE} || true'
-                    sh 'docker rm ${DOCKER_IMAGE} || true'
+                sh """
+                    # Stop existing container
+                    docker stop ${DOCKER_IMAGE} || true
+                    docker rm ${DOCKER_IMAGE} || true
                     
-                    // Run new container
-                    sh """
-                        docker run -d \
-                            --name ${DOCKER_IMAGE} \
-                            -p 8501:8501 \
-                            ${DOCKER_IMAGE}:${DOCKER_TAG}
-                    """
-                }
+                    # Run new container
+                    docker run -d \
+                        --name ${DOCKER_IMAGE} \
+                        -p 8501:8501 \
+                        ${DOCKER_IMAGE}:${DOCKER_TAG}
+                """
             }
+        }
+    }
+    
+    post {
+        failure {
+            echo 'Pipeline failed!'
+        }
+        success {
+            echo 'Pipeline succeeded!'
         }
     }
 }
